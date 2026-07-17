@@ -1,0 +1,29 @@
+{
+    "name": "mauritius-mall-monorepo",
+    "private": true,
+    "engines": {
+      "node": ">=22.19.0"
+    },
+    "pnpm": {
+      "onlyBuiltDependencies": [
+        "@medusajs/telemetry",
+        "@swc/core",
+        "esbuild",
+        "msgpackr-extract",
+        "protobufjs",
+        "sharp",
+        "unrs-resolver"
+      ],
+      "overrides": {
+        "react-router-dom": "6.30.4"
+      }
+    },
+    "scripts": {
+      "dev:backend": "pnpm --filter backend dev",
+      "dev:storefront": "pnpm --filter storefront dev",
+      "build:all": "pnpm --filter backend build && pnpm --filter storefront build",
+      "docker:up": "docker compose up -d",
+      "docker:down": "docker compose down",
+      "db:migrate": "pnpm --filter backend exec medusa db:migrate"
+    }
+  }

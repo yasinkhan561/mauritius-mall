@@ -31,3 +31,7 @@ Thumbs.db
 .medusa/
 medusa-db.sql
 uploads/
+
+#MD files 
+*.md
+except README.md

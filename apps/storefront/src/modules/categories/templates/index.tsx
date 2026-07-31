@@ -30,75 +30,87 @@ export default function CategoryTemplate({
 
   const parents = [] as HttpTypes.StoreProductCategory[]
 
-  const getParents = (category: HttpTypes.StoreProductCategory) => {
-    if (category.parent_category) {
-      parents.push(category.parent_category)
-      getParents(category.parent_category)
+  const getParents = (cat: HttpTypes.StoreProductCategory) => {
+    if (cat.parent_category) {
+      parents.push(cat.parent_category)
+      getParents(cat.parent_category)
     }
   }
 
   getParents(category)
 
   return (
-    <div
-      className="flex flex-col small:flex-row small:items-start py-6 content-container"
-      data-testid="category-container"
-    >
-      <RefinementList
-        sortBy={sort}
-        data-testid="sort-by-container"
-        hideOptionsPicker
-      />
-      <div className="w-full">
-        <div className="flex flex-row mb-8 text-2xl-semi gap-4">
-          {parents &&
-            parents.map((parent) => (
-              <span key={parent.id} className="text-ui-fg-subtle">
-                <LocalizedClientLink
-                  className="mr-4 hover:text-black"
-                  href={`/categories/${parent.handle}`}
-                  data-testid="sort-by-link"
-                >
-                  {parent.name}
-                </LocalizedClientLink>
-                /
-              </span>
-            ))}
-          <h1 data-testid="category-page-title">{category.name}</h1>
-        </div>
-        {category.description && (
-          <div className="mb-8 text-base-regular">
-            <p>{category.description}</p>
-          </div>
-        )}
-        {category.category_children && (
-          <div className="mb-8 text-base-large">
-            <ul className="grid grid-cols-1 gap-2">
-              {category.category_children?.map((c) => (
-                <li key={c.id}>
-                  <InteractiveLink href={`/categories/${c.handle}`}>
-                    {c.name}
-                  </InteractiveLink>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        <Suspense
-          fallback={
-            <SkeletonProductGrid
-              numberOfProducts={category.products?.length ?? 8}
-            />
-          }
+    <div className="content-container py-stack-lg" data-testid="category-container">
+      <div className="mb-8 rounded-xl bg-surface-container-lowest shadow-ambient p-6 md:p-8 border border-surface-container-high">
+        <nav className="flex flex-wrap items-center gap-2 text-sm text-on-surface-variant mb-3">
+          <LocalizedClientLink href="/store" className="hover:text-primary">
+            Shop
+          </LocalizedClientLink>
+          {parents.map((parent) => (
+            <span key={parent.id} className="flex items-center gap-2">
+              <span>/</span>
+              <LocalizedClientLink
+                className="hover:text-primary"
+                href={`/categories/${parent.handle}`}
+              >
+                {parent.name}
+              </LocalizedClientLink>
+            </span>
+          ))}
+          <span>/</span>
+          <span className="text-primary font-semibold">{category.name}</span>
+        </nav>
+        <h1
+          className="text-headline-lg text-on-surface"
+          data-testid="category-page-title"
         >
-          <PaginatedProducts
+          {category.name}
+        </h1>
+        {category.description && (
+          <p className="text-on-surface-variant mt-2 max-w-2xl">
+            {category.description}
+          </p>
+        )}
+        {category.category_children && category.category_children.length > 0 && (
+          <ul className="flex flex-wrap gap-2 mt-4">
+            {category.category_children.map((c) => (
+              <li key={c.id}>
+                <InteractiveLink href={`/categories/${c.handle}`}>
+                  <span className="inline-flex px-3 py-1.5 rounded-lg bg-[rgba(2,128,144,0.1)] text-primary text-sm font-semibold hover:bg-[rgba(2,128,144,0.2)] transition-colors">
+                    {c.name}
+                  </span>
+                </InteractiveLink>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="flex flex-col small:flex-row small:items-start gap-8">
+        <aside className="small:w-64 shrink-0 rounded-xl bg-surface-container-lowest shadow-ambient p-5 border border-surface-container-high">
+          <RefinementList
             sortBy={sort}
-            page={pageNumber}
-            categoryId={category.id}
-            countryCode={countryCode}
-            optionValueIds={optionValueIds}
+            data-testid="sort-by-container"
+            hideOptionsPicker
           />
-        </Suspense>
+        </aside>
+        <div className="w-full min-w-0">
+          <Suspense
+            fallback={
+              <SkeletonProductGrid
+                numberOfProducts={category.products?.length ?? 8}
+              />
+            }
+          >
+            <PaginatedProducts
+              sortBy={sort}
+              page={pageNumber}
+              categoryId={category.id}
+              countryCode={countryCode}
+              optionValueIds={optionValueIds}
+            />
+          </Suspense>
+        </div>
       </div>
     </div>
   )

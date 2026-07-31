@@ -1,157 +1,114 @@
-import { listCategories } from "@lib/data/categories";
-import { listCollections } from "@lib/data/collections";
-import { Text, clx } from "@modules/common/components/ui";
-
-import LocalizedClientLink from "@modules/common/components/localized-client-link";
-import MedusaCTA from "@modules/layout/components/medusa-cta";
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { listCategories } from "@lib/data/categories"
 
 export default async function Footer() {
-  const { collections } = await listCollections({
-    fields: "*products",
-  });
-  const productCategories = await listCategories();
+  const productCategories = await listCategories()
+  const topCategories =
+    productCategories
+      ?.filter((c) => !c.parent_category)
+      .slice(0, 4) ?? []
 
   return (
-    <footer className="border-t border-ui-border-base w-full">
-      <div className="content-container flex flex-col w-full">
-        <div className="flex flex-col gap-y-6 xsmall:flex-row items-start justify-between py-40">
-          <div>
-            <LocalizedClientLink
-              href="/"
-              className="txt-compact-xlarge-plus text-ui-fg-subtle hover:text-ui-fg-base uppercase"
+    <footer className="bg-surface-container-low w-full mt-stack-xl border-t border-surface-container-high">
+      <div className="content-container grid grid-cols-1 md:grid-cols-4 gap-gutter py-stack-xl text-label-md">
+        <div className="flex flex-col gap-4">
+          <LocalizedClientLink
+            href="/"
+            className="text-primary font-bold text-xl flex items-center gap-2"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
             >
-              Medusa Store
-            </LocalizedClientLink>
-          </div>
-          <div className="text-small-regular gap-10 md:gap-x-16 grid grid-cols-2 sm:grid-cols-3">
-            {productCategories && productCategories?.length > 0 && (
-              <div className="flex flex-col gap-y-2">
-                <span className="txt-small-plus txt-ui-fg-base">
-                  Categories
-                </span>
-                <ul
-                  className="grid grid-cols-1 gap-2"
-                  data-testid="footer-categories"
-                >
-                  {productCategories?.slice(0, 6).map((c) => {
-                    if (c.parent_category) {
-                      return;
-                    }
-
-                    const children =
-                      c.category_children?.map((child) => ({
-                        name: child.name,
-                        handle: child.handle,
-                        id: child.id,
-                      })) || null;
-
-                    return (
-                      <li
-                        className="flex flex-col gap-2 text-ui-fg-subtle txt-small"
-                        key={c.id}
-                      >
-                        <LocalizedClientLink
-                          className={clx(
-                            "hover:text-ui-fg-base",
-                            children && "txt-small-plus"
-                          )}
-                          href={`/categories/${c.handle}`}
-                          data-testid="category-link"
-                        >
-                          {c.name}
-                        </LocalizedClientLink>
-                        {children && (
-                          <ul className="grid grid-cols-1 ml-3 gap-2">
-                            {children &&
-                              children.map((child) => (
-                                <li key={child.id}>
-                                  <LocalizedClientLink
-                                    className="hover:text-ui-fg-base"
-                                    href={`/categories/${child.handle}`}
-                                    data-testid="category-link"
-                                  >
-                                    {child.name}
-                                  </LocalizedClientLink>
-                                </li>
-                              ))}
-                          </ul>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            )}
-            {collections && collections.length > 0 && (
-              <div className="flex flex-col gap-y-2">
-                <span className="txt-small-plus txt-ui-fg-base">
-                  Collections
-                </span>
-                <ul
-                  className={clx(
-                    "grid grid-cols-1 gap-2 text-ui-fg-subtle txt-small",
-                    {
-                      "grid-cols-2": (collections?.length || 0) > 3,
-                    }
-                  )}
-                >
-                  {collections?.slice(0, 6).map((c) => (
-                    <li key={c.id}>
-                      <LocalizedClientLink
-                        className="hover:text-ui-fg-base"
-                        href={`/collections/${c.handle}`}
-                      >
-                        {c.title}
-                      </LocalizedClientLink>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            <div className="flex flex-col gap-y-2">
-              <span className="txt-small-plus txt-ui-fg-base">Medusa</span>
-              <ul className="grid grid-cols-1 gap-y-2 text-ui-fg-subtle txt-small">
-                <li>
-                  <a
-                    href="https://github.com/medusajs"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:text-ui-fg-base"
-                  >
-                    GitHub
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://docs.medusajs.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:text-ui-fg-base"
-                  >
-                    Documentation
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://github.com/medusajs/dtc-starter"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:text-ui-fg-base"
-                  >
-                    Source code
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
+              <path d="M12 3c-1.5 2.5-4 4-4 7a4 4 0 008 0c0-3-2.5-4.5-4-7zm-6 11c0 3.314 2.686 6 6 6s6-2.686 6-6c0-1.5-.5-2.5-1.5-3.5.5 1.5.5 2.5-.5 3.5-1 1-2 1.5-4 1.5s-3-.5-4-1.5c-1-1-1-2-.5-3.5C6.5 11.5 6 12.5 6 14z" />
+            </svg>
+            Mauritius Mall
+          </LocalizedClientLink>
+          <p className="text-on-surface-variant text-sm font-normal leading-6">
+            Bringing the vibrant spirit of Mauritius to your doorstep. Quality
+            products, local support, effortless luxury.
+          </p>
         </div>
-        <div className="flex w-full mb-16 justify-between text-ui-fg-muted">
-          <Text className="txt-compact-small">
-            © {new Date().getFullYear()} Medusa Store. All rights reserved.
-          </Text>
-          <MedusaCTA />
+
+        <div className="flex flex-col gap-3">
+          <h4 className="text-on-surface font-bold mb-1 uppercase tracking-wider text-xs">
+            Customer Care
+          </h4>
+          <LocalizedClientLink
+            href="/account"
+            className="text-on-surface-variant hover:text-primary transition-colors"
+          >
+            Contact Support
+          </LocalizedClientLink>
+          <LocalizedClientLink
+            href="/store"
+            className="text-on-surface-variant hover:text-primary transition-colors"
+          >
+            FAQs
+          </LocalizedClientLink>
+          <LocalizedClientLink
+            href="/cart"
+            className="text-on-surface-variant hover:text-primary transition-colors"
+          >
+            Returns & Exchanges
+          </LocalizedClientLink>
+          <LocalizedClientLink
+            href="/account/orders"
+            className="text-on-surface-variant hover:text-primary transition-colors"
+          >
+            Track Order
+          </LocalizedClientLink>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <h4 className="text-on-surface font-bold mb-1 uppercase tracking-wider text-xs">
+            Shop
+          </h4>
+          <LocalizedClientLink
+            href="/store"
+            className="text-on-surface-variant hover:text-primary transition-colors"
+          >
+            All Products
+          </LocalizedClientLink>
+          {topCategories.map((c) => (
+            <LocalizedClientLink
+              key={c.id}
+              href={`/categories/${c.handle}`}
+              className="text-on-surface-variant hover:text-primary transition-colors"
+            >
+              {c.name}
+            </LocalizedClientLink>
+          ))}
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <h4 className="text-on-surface font-bold mb-1 uppercase tracking-wider text-xs">
+            Secure Payments
+          </h4>
+          <p className="text-on-surface-variant text-sm font-normal mb-1">
+            We accept local and international payment methods.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {["MCB Juice", "Blink", "VISA / MC", "COD"].map((method) => (
+              <div
+                key={method}
+                className="px-3 py-1.5 bg-surface-container-lowest border border-outline-variant rounded shadow-sm text-xs font-bold text-primary"
+              >
+                {method}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
+
+      <div className="border-t border-surface-container-high py-6 text-center text-sm text-on-surface-variant">
+        <p>
+          © {new Date().getFullYear()} Mauritius Mall. Crafted with Island
+          Spirit.
+        </p>
+      </div>
     </footer>
-  );
+  )
 }

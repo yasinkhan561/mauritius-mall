@@ -302,6 +302,10 @@ export default async function seedMauritiusStore({
           title: "Color",
           values: ["Black", "White", "Blue"],
         },
+        {
+          title: "Default",
+          values: ["Default"],
+        },
       ],
     },
   })
@@ -311,6 +315,9 @@ export default async function seedMauritiusStore({
   )!
   const colorOption = productOptionsResult.find(
     (option) => option.title === "Color"
+  )!
+  const defaultOption = productOptionsResult.find(
+    (option) => option.title === "Default"
   )!
 
   await createProductsWorkflow(container).run({
@@ -398,10 +405,12 @@ export default async function seedMauritiusStore({
               url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/sweatpants-gray-front.png",
             },
           ],
+          options: [{ id: defaultOption.id }],
           variants: [
             {
               title: "Default",
               sku: "COOKWARE-SET",
+              options: { Default: "Default" },
               prices: [MUR_PRICE(3499)],
             },
           ],
@@ -422,10 +431,12 @@ export default async function seedMauritiusStore({
               url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/sweatshirt-vintage-front.png",
             },
           ],
+          options: [{ id: defaultOption.id }],
           variants: [
             {
               title: "Default",
               sku: "BLOCKS-120",
+              options: { Default: "Default" },
               prices: [MUR_PRICE(1299)],
             },
           ],
@@ -478,10 +489,12 @@ export default async function seedMauritiusStore({
               url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/shorts-vintage-back.png",
             },
           ],
+          options: [{ id: defaultOption.id }],
           variants: [
             {
               title: "Default",
               sku: "POWERBANK-10K",
+              options: { Default: "Default" },
               prices: [MUR_PRICE(1599)],
             },
           ],

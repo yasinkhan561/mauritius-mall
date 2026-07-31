@@ -1,28 +1,12 @@
 import { Metadata } from "next"
-import Image from "next/image"
-import Link from "next/link"
 
 import { listCollections } from "@lib/data/collections"
+import { listProducts } from "@lib/data/products"
 import { getRegion } from "@lib/data/regions"
-import { convertToLocale } from "@lib/util/money"
-import { HttpTypes } from "@medusajs/types"
-import FeaturedProducts from "@modules/home/components/featured-products"
-
-const PLACEHOLDERS = [
-  "https://placehold.co/1200x600/0056b3/ffffff?text=Shop+Now",
-  "https://placehold.co/600x400/ff3e6c/ffffff?text=New+In",
-  "https://placehold.co/600x400/ffc107/333333?text=Trending",
-]
-
-const FREE_SHIPPING_THRESHOLD = 1500
-
-const SIDE_SEGMENT_LABELS = ["New In", "Trending"]
-
-const DEFAULT_HERO = {
-  title: "Shop Mauritius Mall",
-  subtitle: "Curated collections, fast local delivery, and exclusive deals.",
-  handle: "store",
-}
+import { getProductPrice } from "@lib/util/get-product-price"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import HomeHero from "@modules/home/components/hero"
+import ProductPreview from "@modules/products/components/product-preview"
 
 export const metadata: Metadata = {
   title: "Mauritius Mall | Shop Online with Free Shipping",
@@ -30,288 +14,214 @@ export const metadata: Metadata = {
     "Discover hot deals, new arrivals, and trending products. Shop local collections with fast delivery across Mauritius.",
 }
 
-function getMetadataString(
-  metadata: Record<string, unknown> | null | undefined,
-  key: string
-): string | null {
-  const value = metadata?.[key]
-  return typeof value === "string" ? value : null
-}
-
-function isValidImageUrl(url: string | null | undefined): url is string {
-  if (!url) {
-    return false
-  }
-
-  try {
-    const parsed = new URL(url)
-    return parsed.protocol === "http:" || parsed.protocol === "https:"
-  } catch {
-    return false
-  }
-}
-
-function getCollectionImage(
-  collection: HttpTypes.StoreCollection | undefined,
-  fallbackIndex: number
-): string {
-  if (collection) {
-    const metaImage =
-      getMetadataString(collection.metadata, "banner_image") ??
-      getMetadataString(collection.metadata, "image")
-
-    if (isValidImageUrl(metaImage)) {
-      return metaImage
-    }
-
-    const productThumbnail = collection.products?.[0]?.thumbnail
-    if (isValidImageUrl(productThumbnail)) {
-      return productThumbnail
-    }
-  }
-
-  return PLACEHOLDERS[fallbackIndex % PLACEHOLDERS.length]
-}
-
-function shouldUseNativeImage(src: string): boolean {
-  try {
-    const { hostname } = new URL(src)
-    return hostname === "placehold.co"
-  } catch {
-    return true
-  }
-}
-
-const HERO_IMAGE_SIZES =
-  "(max-width: 512px) 88vw, (max-width: 1024px) 66vw, 900px"
-const SIDE_IMAGE_SIZES =
-  "(max-width: 512px) 88vw, (max-width: 1024px) 88vw, 420px"
-
-function CollectionImage({
-  src,
-  alt,
-  priority = false,
-  sizes = HERO_IMAGE_SIZES,
-  className,
-}: {
-  src: string
-  alt: string
-  priority?: boolean
-  sizes?: string
-  className?: string
-}) {
-  if (shouldUseNativeImage(src)) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={src}
-        alt={alt}
-        fetchPriority={priority ? "high" : "auto"}
-        loading={priority ? "eager" : "lazy"}
-        decoding="async"
-        className={className}
-      />
-    )
-  }
-
-  return (
-    <Image
-      src={src}
-      alt={alt}
-      fill
-      priority={priority}
-      loading={priority ? "eager" : "lazy"}
-      sizes={sizes}
-      className={className}
-    />
-  )
-}
+const VALUE_PROPS = [
+  {
+    title: "Island-Wide Express",
+    description: "Fast delivery to all districts",
+    icon: (
+      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M3 13h2v5H3v-5zm4-4h2v9H7V9zm4-4h2v13h-2V5zm4 6h2v7h-2v-7zm4-3h2v10h-2V8z" />
+      </svg>
+    ),
+  },
+  {
+    title: "MCB Juice & Cards",
+    description: "Secure local payment gateways",
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+      </svg>
+    ),
+  },
+  {
+    title: "Easy Returns",
+    description: "Hassle-free local support",
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+      </svg>
+    ),
+  },
+  {
+    title: "100% Authentic",
+    description: "Genuine quality products",
+    icon: (
+      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-6z" />
+      </svg>
+    ),
+  },
+]
 
 export default async function Home(props: {
   params: Promise<{ countryCode: string }>
 }) {
-  const params = await props.params
-  const { countryCode } = params
-
+  const { countryCode } = await props.params
   const region = await getRegion(countryCode)
 
   const { collections } = await listCollections({
     fields: "id, handle, title, metadata, *products",
   })
 
-  if (!collections || !region) {
+  if (!region) {
     return null
   }
 
-  const heroCollection = collections[0]
-  const sideCollections = [
-    collections[1] ?? null,
-    collections[2] ?? null,
-  ] as const
+  const hotDeals =
+    collections?.find(
+      (c) =>
+        c.handle === "hot-deals" ||
+        c.metadata?.is_hot === true ||
+        c.metadata?.is_hot === "true"
+    ) ?? collections?.[0]
 
-  const heroTitle = heroCollection?.title ?? DEFAULT_HERO.title
-  const heroSubtitle =
-    getMetadataString(heroCollection?.metadata, "subtitle") ??
-    DEFAULT_HERO.subtitle
-  const heroHandle = heroCollection?.handle ?? DEFAULT_HERO.handle
-  const heroImage = getCollectionImage(heroCollection, 0)
+  const trending =
+    collections?.find((c) => c.handle === "trending") ??
+    collections?.[1] ??
+    collections?.[0]
 
-  const freeShippingLabel = convertToLocale({
-    amount: FREE_SHIPPING_THRESHOLD,
-    currency_code: region.currency_code,
+  const {
+    response: { products: trendingProducts },
+  } = await listProducts({
+    regionId: region.id,
+    queryParams: {
+      limit: 8,
+      fields: "*variants.calculated_price",
+      ...(trending?.id ? { collection_id: trending.id } : {}),
+    },
   })
 
-  const showHotDeals =
-    heroCollection?.metadata?.is_hot === true ||
-    heroCollection?.metadata?.is_hot === "true" ||
-    Boolean(heroCollection)
+  // Prefer priced products from listProducts so the chip can show MUR amounts
+  const featuredProduct = trendingProducts?.[0] ?? null
+  const featuredPrice = featuredProduct
+    ? getProductPrice({ product: featuredProduct }).cheapestPrice
+    : null
 
   return (
-    <>
-      <aside
-        aria-label="Promotions"
-        className="w-full border-b border-accent bg-accent/10"
-      >
-        <div className="content-container flex flex-wrap items-center justify-center gap-x-4 gap-y-2 py-2.5 text-xs xsmall:text-sm">
-          <span className="inline-flex items-center gap-1.5 font-medium text-primary">
-            <span aria-hidden="true" className="text-accent">
-              ✓
-            </span>
-            Free Shipping on orders over {freeShippingLabel}
-          </span>
-          <span
-            aria-hidden="true"
-            className="hidden xsmall:inline text-primary/30"
+    <div className="content-container py-6 md:py-8 flex flex-col gap-8 md:gap-10">
+      <HomeHero
+        featuredProduct={featuredProduct}
+        featuredPrice={featuredPrice}
+        hotDealsHref={hotDeals ? `/collections/${hotDeals.handle}` : "/store"}
+        storeHref="/store"
+      />
+
+      {/* Value props */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {VALUE_PROPS.map((prop) => (
+          <div
+            key={prop.title}
+            className="bg-surface-container-lowest p-6 rounded-xl shadow-ambient text-center flex flex-col items-center gap-3 transition-ambient shadow-ambient-hover border border-transparent hover:border-[rgba(0,168,150,0.2)]"
           >
-            |
-          </span>
-          <span className="text-primary/80">
-            Prices in {region.currency_code.toUpperCase()}
-          </span>
-          {showHotDeals && (
-            <>
-              <span
-                aria-hidden="true"
-                className="hidden xsmall:inline text-primary/30"
-              >
-                |
-              </span>
-              <span className="inline-flex rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-uiBg">
-                Hot Deals
-              </span>
-            </>
-          )}
-        </div>
-      </aside>
+            <div className="w-12 h-12 rounded-full bg-[rgba(2,128,144,0.1)] flex items-center justify-center text-primary-container mb-2">
+              {prop.icon}
+            </div>
+            <h3 className="font-bold text-on-surface">{prop.title}</h3>
+            <p className="text-sm text-on-surface-variant">{prop.description}</p>
+          </div>
+        ))}
+      </section>
 
-      <section
-        aria-labelledby="hero-heading"
-        className="content-container py-4 small:py-8"
-      >
-        <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar small:grid small:grid-cols-3 small:grid-rows-2 small:gap-4 small:overflow-visible small:snap-none">
-          <article className="relative aspect-[16/9] w-[88vw] shrink-0 snap-center overflow-hidden rounded-large small:col-span-2 small:row-span-2 small:aspect-auto small:min-h-[420px] small:w-auto">
-            <div className="absolute inset-0 relative">
-              <CollectionImage
-                src={heroImage}
-                alt={heroTitle}
-                priority
-                className="h-full w-full object-cover object-center"
+      {/* Trending */}
+      <section className="flex flex-col gap-6">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h2 className="text-headline-lg text-on-surface">Trending Today</h2>
+            <p className="text-on-surface-variant mt-1">
+              Top picks loved by locals this week.
+            </p>
+          </div>
+          <LocalizedClientLink
+            href={trending ? `/collections/${trending.handle}` : "/store"}
+            className="text-lagoon-teal text-label-md flex items-center gap-1 hover:underline shrink-0"
+          >
+            View All <span aria-hidden="true">→</span>
+          </LocalizedClientLink>
+        </div>
+
+        {trendingProducts?.length ? (
+          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {trendingProducts.slice(0, 4).map((product) => (
+              <li key={product.id}>
+                <ProductPreview product={product} region={region} isFeatured />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-on-surface-variant">
+            No products yet. Check back soon.
+          </p>
+        )}
+      </section>
+
+      {/* Collection rails */}
+      {collections && collections.length > 0 && (
+        <section className="flex flex-col gap-stack-lg">
+          {collections
+            .filter((c) => c.id !== trending?.id)
+            .slice(0, 2)
+            .map((collection) => (
+              <CollectionRail
+                key={collection.id}
+                collectionId={collection.id}
+                title={collection.title}
+                handle={collection.handle}
+                regionId={region.id}
+                region={region}
               />
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/85 to-primary/30" />
-            <div className="relative z-10 flex h-full flex-col justify-end gap-3 p-5 xsmall:p-6">
-              <h1
-                id="hero-heading"
-                className="text-2xl font-bold leading-tight text-uiBg xsmall:text-4xl"
-              >
-                {heroTitle}
-              </h1>
-              <p className="max-w-lg text-sm leading-relaxed text-uiBg/90 xsmall:text-base">
-                {heroSubtitle}
-              </p>
-              <Link
-                href={`/${countryCode}/collections/${heroHandle}`}
-                className="inline-flex w-fit rounded-large bg-secondary px-6 py-3 text-sm font-semibold text-uiBg transition-colors hover:bg-secondary/90"
-              >
-                Shop Collection
-              </Link>
-            </div>
-          </article>
+            ))}
+        </section>
+      )}
+    </div>
+  )
+}
 
-          {sideCollections.map((collection, index) => {
-            const fallbackIndex = index + 1
-            const title =
-              collection?.title ??
-              (index === 0 ? "New Arrivals" : "Trending Now")
-            const segmentLabel =
-              getMetadataString(collection?.metadata, "segment_label") ??
-              SIDE_SEGMENT_LABELS[index]
-            const handle = collection?.handle ?? "store"
-            const image = getCollectionImage(collection ?? undefined, fallbackIndex)
+async function CollectionRail({
+  collectionId,
+  title,
+  handle,
+  regionId,
+  region,
+}: {
+  collectionId: string
+  title: string
+  handle: string
+  regionId: string
+  region: Awaited<ReturnType<typeof getRegion>>
+}) {
+  if (!region) return null
 
-            return (
-              <article
-                key={collection?.id ?? `side-offer-${index}`}
-                className="relative aspect-[4/3] w-[88vw] shrink-0 snap-center overflow-hidden rounded-large small:col-span-1 small:w-auto"
-              >
-                <Link
-                  href={`/${countryCode}/collections/${handle}`}
-                  className="group relative block h-full w-full"
-                >
-                  <div className="absolute inset-0 relative">
-                    <CollectionImage
-                      src={image}
-                      alt={title}
-                      sizes={SIDE_IMAGE_SIZES}
-                      className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent" />
-                  <div className="relative z-10 flex h-full flex-col justify-end p-4">
-                    <span className="mb-1 inline-flex w-fit rounded-full border border-accent bg-accent/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
-                      {segmentLabel}
-                    </span>
-                    <h2 className="text-lg font-bold leading-snug text-uiBg">
-                      {title}
-                    </h2>
-                    <p className="mt-1 text-xs text-uiBg/80">
-                      Explore the collection
-                    </p>
-                  </div>
-                </Link>
-              </article>
-            )
-          })}
-        </div>
-      </section>
+  const {
+    response: { products },
+  } = await listProducts({
+    regionId,
+    queryParams: {
+      collection_id: collectionId,
+      limit: 4,
+      fields: "*variants.calculated_price",
+    },
+  })
 
-      <nav aria-label="Shop by category" className="content-container pb-2">
-        <h2 className="sr-only">Browse collections</h2>
-        <ul className="flex gap-3 overflow-x-auto py-4 no-scrollbar">
-          {collections.map((collection) => (
-            <li key={collection.id} className="shrink-0">
-              <Link
-                href={`/${countryCode}/collections/${collection.handle}`}
-                className="flex w-20 flex-col items-center gap-2 rounded-large border border-accent/30 bg-uiBg p-3 transition-colors hover:border-secondary xsmall:w-24"
-              >
-                <span
-                  aria-hidden="true"
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-bold uppercase text-primary"
-                >
-                  {collection.title.charAt(0)}
-                </span>
-                <h3 className="line-clamp-2 text-center text-xs font-medium text-primary">
-                  {collection.title}
-                </h3>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
+  if (!products?.length) return null
 
-      <section aria-label="Featured collections" className="py-12">
-        <FeaturedProducts collections={collections} region={region} />
-      </section>
-    </>
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-headline-lg text-on-surface">{title}</h2>
+        <LocalizedClientLink
+          href={`/collections/${handle}`}
+          className="text-lagoon-teal text-label-md hover:underline"
+        >
+          View All →
+        </LocalizedClientLink>
+      </div>
+      <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {products.map((product) => (
+          <li key={product.id}>
+            <ProductPreview product={product} region={region} />
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }

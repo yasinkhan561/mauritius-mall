@@ -32,35 +32,40 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   return (
     <>
       <div
-        className="content-container  flex flex-col small:flex-row small:items-start py-6 relative"
+        className="content-container py-stack-lg"
         data-testid="product-container"
       >
-        <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-6">
-          <ProductInfo product={product} />
-          <ProductTabs product={product} />
-        </div>
-        <div className="block w-full relative">
-          <ImageGallery images={images} />
-        </div>
-        <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-12">
-          <ProductOnboardingCta />
-          <Suspense
-            fallback={
-              <ProductActions
-                disabled={true}
-                product={product}
-                region={region}
-              />
-            }
-          >
-            <ProductActionsWrapper id={product.id} region={region} />
-          </Suspense>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 bg-surface-container-lowest rounded-2xl shadow-ambient p-4 md:p-8 border border-surface-container-high">
+          <div className="w-full relative rounded-xl overflow-hidden bg-surface-container-low">
+            <ImageGallery images={images} />
+          </div>
+          <div className="flex flex-col gap-6 lg:py-2">
+            <ProductInfo product={product} />
+            <ProductOnboardingCta />
+            <Suspense
+              fallback={
+                <ProductActions
+                  disabled={true}
+                  product={product}
+                  region={region}
+                />
+              }
+            >
+              <ProductActionsWrapper id={product.id} region={region} />
+            </Suspense>
+            <div className="border-t border-surface-container-high pt-6">
+              <ProductTabs product={product} />
+            </div>
+          </div>
         </div>
       </div>
       <div
-        className="content-container my-16 small:my-32"
+        className="content-container my-12 small:my-16"
         data-testid="related-products-container"
       >
+        <h2 className="text-headline-lg text-on-surface mb-6">
+          You may also like
+        </h2>
         <Suspense fallback={<SkeletonRelatedProducts />}>
           <RelatedProducts product={product} countryCode={countryCode} />
         </Suspense>

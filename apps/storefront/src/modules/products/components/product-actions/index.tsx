@@ -172,7 +172,7 @@ export default function ProductActions({
             !isValidVariant
           }
           variant="primary"
-          className="w-full h-10"
+          className="w-full h-12 text-base rounded-lg"
           isLoading={isAdding}
           data-testid="add-product-button"
         >
@@ -180,7 +180,7 @@ export default function ProductActions({
             ? "Select variant"
             : !inStock || !isValidVariant
             ? "Out of stock"
-            : "Add to cart"}
+            : "Add to Cart"}
         </Button>
         <MobileActions
           product={product}

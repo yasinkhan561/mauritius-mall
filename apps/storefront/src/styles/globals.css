@@ -3,20 +3,39 @@
 @import "tailwindcss/utilities";
 
 :root {
-  --primary: #0056b3;
-  --secondary: #ff3e6c;
-  --accent: #ffc107;
+  /* L'Île Moderne — brand aliases used across the app */
+  --primary: #006572;
+  --primary-container: #028090;
+  --secondary: #006b5f;
+  --secondary-container: #76f4e0;
+  --accent: #f4a261;
+  --coral-gold: #f4a261;
+  --lagoon-teal: #028090;
+  --island-turquoise: #00a896;
   --ui-bg: #ffffff;
+  --background: #f8f9fa;
+  --surface: #f8f9fa;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f3f4f5;
+  --surface-container: #edeeef;
+  --surface-container-high: #e7e8e9;
+  --surface-container-highest: #e1e3e4;
+  --on-surface: #191c1d;
+  --on-surface-variant: #3e494b;
+  --on-primary: #ffffff;
+  --outline: #6e797b;
+  --outline-variant: #bdc8cb;
+  --error: #ba1a1a;
 }
 
-[data-theme="kids-toys"] {
-  --primary: #ff6b6b;
-  --secondary: #4ecdc4;
-  --accent: #ffe66d;
+@layer base {
+  body {
+    @apply bg-surface text-on-surface antialiased;
+    font-family: var(--font-plus-jakarta), "Plus Jakarta Sans", sans-serif;
+  }
 }
 
 @layer utilities {
-  /* Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -26,8 +45,32 @@
   }
 
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .shadow-ambient {
+    box-shadow: 0px 4px 20px rgba(2, 128, 144, 0.08);
+  }
+
+  .shadow-ambient-hover {
+    transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .shadow-ambient-hover:hover {
+    box-shadow: 0px 12px 32px rgba(2, 128, 144, 0.12);
+    transform: translateY(-2px);
+  }
+
+  .glass-nav {
+    background: rgba(248, 249, 250, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .transition-ambient {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   input:focus ~ label,
@@ -64,11 +107,41 @@
 
 @layer components {
   .content-container {
-    @apply max-w-[1440px] w-full mx-auto px-6;
+    /* Wide marketplace shell — Stitch artboard is 1280px edge-to-edge;
+       on real desktops we scale the same composition up to 1600px. */
+    @apply max-w-[1600px] w-full mx-auto px-4 md:px-8 xl:px-12 2xl:px-16;
   }
 
   .contrast-btn {
-    @apply px-4 py-2 border border-black rounded-full hover:bg-black hover:text-white transition-colors duration-200 ease-in;
+    @apply px-4 py-2 border border-lagoon-teal text-lagoon-teal rounded-lg transition-colors duration-200 ease-in;
+  }
+
+  .contrast-btn:hover {
+    background-color: rgba(2, 128, 144, 0.05);
+  }
+
+  .btn-primary {
+    @apply bg-coral-gold text-white font-semibold px-8 py-3.5 rounded-lg shadow-md transition-colors;
+  }
+
+  .btn-primary:hover {
+    background-color: #e08d4a;
+  }
+
+  .btn-secondary {
+    @apply border-[1.5px] border-lagoon-teal text-lagoon-teal font-semibold px-8 py-3.5 rounded-lg transition-colors;
+  }
+
+  .btn-secondary:hover {
+    background-color: rgba(2, 128, 144, 0.05);
+  }
+
+  .btn-ghost {
+    @apply text-island-turquoise font-semibold transition-colors;
+  }
+
+  .btn-ghost:hover {
+    text-decoration: underline;
   }
 
   .text-xsmall-regular {
@@ -121,5 +194,33 @@
 
   .text-3xl-semi {
     @apply text-[32px] leading-[44px] font-semibold;
+  }
+
+  .text-display-lg {
+    @apply text-[32px] leading-10 font-bold tracking-[-0.01em] md:text-[48px] md:leading-[56px] md:tracking-[-0.02em];
+  }
+
+  .text-headline-lg {
+    @apply text-[32px] leading-10 font-semibold;
+  }
+
+  .text-headline-md {
+    @apply text-2xl leading-8 font-semibold;
+  }
+
+  .text-body-lg {
+    @apply text-lg leading-7 font-normal;
+  }
+
+  .text-body-md {
+    @apply text-base leading-6 font-normal;
+  }
+
+  .text-label-md {
+    @apply text-sm leading-5 font-semibold tracking-[0.01em];
+  }
+
+  .text-label-sm {
+    @apply text-xs leading-4 font-medium;
   }
 }
